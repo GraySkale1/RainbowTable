@@ -41,8 +41,7 @@ uint32_t *_padding(unsigned char *string) {
 	unsigned char *padded_string = calloc(padding + str_length + 8*48, sizeof(unsigned char));
 	assert(padded_string != NULL);
 
-	printf("With padding, string is now %ld bits\n", (padding + str_length)*8);
-
+	
 	strncpy(padded_string, string, str_length);
 
 	padded_string[padding + str_length - 1] = (str_length * 8);
@@ -51,10 +50,8 @@ uint32_t *_padding(unsigned char *string) {
 
 //	for (int i=0; i < (padding + str_length + 8*48); i++) {
 //		if (!(i % 4) && (i != 0)) {printf("\n");}
-//		printf("%02x", padded_string[i]);
-//	}
-//	printf("\n");
-	
+//		//	}
+//		
 	uint32_t *padded_words = (uint32_t *) padded_string;
 
 	for (int i = 0; i < BLOCK_SIZE; i++) {
@@ -100,23 +97,17 @@ uint32_t *block_compression(uint32_t *block) {
 
 	for (int i=0; i < 64; i++) {
 		s1 = right_rotate(e, 6) ^ right_rotate(e, 11) ^ right_rotate(e, 25);
-		printf("s1: %x\n", s1);
-			
+					
 		ch = (e & f) ^ ((~e) & g);
-		printf("ch: %x\n", ch);
-
+		
 		temp1 = h + s1 + ch + CUBE_ROOTS[i] + block[i];
-		printf("temp1: %x\n", temp1);
-
+		
 		s0 = right_rotate(a, 2) ^ right_rotate(a, 13) ^ right_rotate(a, 22);
-		printf("s0: %x\n", s0);
-
+		
 		maj = (a & b) ^ (a & c) ^ (b & c);
-		printf("maj: %x\n", maj);
-
+		
 		temp2 = s0 + maj;
-		printf("temp2: %x\n", temp2);
-
+		
 		h = g;
 		g = f;
 		f = e;
@@ -125,8 +116,7 @@ uint32_t *block_compression(uint32_t *block) {
 		c = b;
 		b = a;
 		a = temp1 + temp2;
-		printf("%x, %x, %x, %x, %x, %x, %x, %x\n",a,b,c,d,e,f,g,h);
-	}	
+			}	
 
 	uint32_t *digest = malloc(8 * sizeof(uint32_t));
 	assert(digest != NULL);
@@ -148,8 +138,7 @@ int main(int argc, char *argv[]) {
 
 	if (argc > 1) {
 		strncpy(user_arg, argv[1], 64);
-		printf("%s\n", user_arg);
-	}
+			}
 
 	uint32_t *padded_block = _padding(user_arg); // [0-63]
 

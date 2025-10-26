@@ -1,5 +1,5 @@
-sha256: sha256.c
-	gcc -o sha256 sha256.c
+binary:
+	time -p gcc -o BlockSha256 BlockSha256.c
 
 clear:
-	rm sha256
+	rm BlockSha256

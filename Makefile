@@ -1,5 +1,5 @@
-binary:
-	time -p gcc -o BlockSha256 BlockSha256.c
+binary: better.c
+	time -p gcc -o better better.c
 
 clear:
-	rm BlockSha256
+	rm better

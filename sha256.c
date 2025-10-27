@@ -110,7 +110,7 @@ void compress(chunk *block) {
 		a = temp1 + temp2;
 	}	
 
-	printf("before: %x\n", digest[0]);
+	//printf("before: %x\n", digest[0]);
 
 	digest[0] += a;
 	digest[1] += b;
@@ -121,7 +121,7 @@ void compress(chunk *block) {
 	digest[6] += g;
 	digest[7] += h;
 
-	printf("after: %x\n", digest[0]);
+	//printf("after: %x\n", digest[0]);
 }
 
 void iterate(chunk *padding) {
@@ -131,7 +131,7 @@ void iterate(chunk *padding) {
 	for (int i=0; i<64; i++) {
 		padding -> words[i] = htonl(padding -> words[i]);
 	}
-	print_chunk(padding, 0);
+	//print_chunk(padding, 0);
 	
 	for (int i = 16; i < 64; i++) {
 		cur_int	= padding -> words[i-15];
@@ -166,23 +166,26 @@ void start_cha(unsigned char input[], uint64_t total_bits) {
 			padding -> bytes[63 - i] = (unsigned char)((total_bits) >> (i * 8) & 0xFF);
 		}
 
-		printf("value in hex: %ld\n", total_bits);
+		//printf("value in hex: %ld\n", total_bits);
 		iterate(padding);
 		free(padding);
 	}
 	else { //is less than 64 bytes but requires another chunk to fit ending stuff
 		padding -> bytes[strlen(input)] = 0x80;
 		for (int i = 0; i < 8; i++) {
-			padding -> bytes[63 - i] = (unsigned char)((total_bits) >> (i * 8) & 0xFF);
+			padding -> bytes[64 + (63 - i)] = (unsigned char)((total_bits) >> (i * 8) & 0xFF);
 		}
 
 		chunk *extra = calloc(64, 32);
+		//print_chunk(padding, 0);
 		memcpy(extra -> bytes, padding -> bytes + 64, 64);
 		memset(padding -> bytes + 64*8, '\0', 64);
 
+		//print_chunk(padding, 0);
 		iterate(padding);
 		free(padding);
 
+		//print_chunk(extra, 0);
 		iterate(extra);
 		free(extra);
 	}
@@ -195,14 +198,24 @@ int main(int argc, char *argv[]) {
 	plaintext[strlen(argv[1])] = '\0'; //marks the end of the string
 
 	size_t chunks = ceil_div(strlen(plaintext) + 9, BLOCK_SIZE);
+	//printf("chunks: %ld\n", chunks);
+
+	unsigned char neutered_input64[64];
 
 	for (int i=0; i < chunks; i++) {
+		//printf("indexing %d in plaintext\n", i*64);
 		size_t cpy_size = strlen(plaintext + i*64) < 64 ? strlen(plaintext + i*64) : 64;
-		unsigned char neutered_input64[64];
-		strncpy(neutered_input64, plaintext + i*64, cpy_size);
-		printf("%s\n", neutered_input64);
+		//printf("cpy_size = %ld\n", cpy_size);
+		
+		memcpy(neutered_input64, plaintext + i*64, cpy_size);
+
+		//printf("%s\n", neutered_input64);
+
 		start_cha( neutered_input64, strlen(plaintext)*8 );
 		memset(neutered_input64, '\0', 64);
+		if (cpy_size < 64) {
+			break;
+		}
 	}
 	for (int i=0; i < 8; i++) {
 		printf("%x", digest[i]);
